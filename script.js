@@ -1,17 +1,68 @@
-// Wait for the DOM to be ready
-$(document).ready(function () {
-    // Function to display the current date in the header
+document.addEventListener('DOMContentLoaded', function () {
+    // Function to display the current date and time in the header
     function displayCurrentDate() {
-        // Get the current date
         const currentDate = dayjs();
-
-        // Create a formatted date string
         const formattedDate = currentDate.format('dddd, MMMM D, YYYY');
-
-        // Set the text content of the "currentDay" element in the header
         $('#currentDay').text(formattedDate);
     }
 
-    // Call the function to display the current date
+    // Function to update time block classes based on current time
+    function updateBlockClasses() {
+        const currentTime = dayjs();
+        console.log("Current Time:", currentTime);
+        $('.row[id^="timeblock-"]').each(function () {
+            const timeId = $(this).attr('id');
+            const blockTime = dayjs(timeId.replace('timeblock-', ''), 'hA');
+            const timeBlock = $(this);
+            if (blockTime.isBefore(currentTime, 'hour')) {
+                timeBlock.addClass('past').removeClass('present future');
+            } else if (blockTime.isSame(currentTime, 'hour')) {
+                timeBlock.addClass('present').removeClass('past future');
+            } else {
+                timeBlock.addClass('future').removeClass('past present');
+            }
+        });
+    }
+
+    // Load saved events from local storage and populate textareas
+    function loadSavedEvents() {
+        $('.row[id^="timeblock-"]').each(function () {
+            const timeId = $(this).attr('id');
+            const savedEvent = localStorage.getItem(timeId);
+
+            if (savedEvent) {
+                const textarea = $(this).find('.description');
+                textarea.val(savedEvent);
+            }
+        });
+    }
+
+    // Call the functions to display the current date, load saved events, and update block classes
     displayCurrentDate();
+    updateBlockClasses();
+    loadSavedEvents();
+
+    // Listen for save button clicks
+    $('.saveBtn').on('click', function () {
+        // Log that it's saved
+        console.log('It saved');
+
+        // Get the parent timeblock element
+        const timeBlock = $(this).closest('.row');
+        const timeId = timeBlock.attr('id');
+
+        // Get the value from the description textarea
+        const value = timeBlock.find('.description').val();
+
+        // Save the event to local storage
+        localStorage.setItem(timeId, value);
+
+        // Display a notification
+        $(".notification").addClass('show');
+        setTimeout(function () {
+            $(".notification").removeClass('show');
+        }, 5000);
+    });
 });
+
+
