@@ -6,23 +6,27 @@ document.addEventListener('DOMContentLoaded', function () {
         $('#currentDay').text(formattedDate);
     }
 
-    // Function to update time block classes based on current time
-    function updateBlockClasses() {
-        const currentTime = dayjs();
-        console.log("Current Time:", currentTime);
-        $('.row[id^="timeblock-"]').each(function () {
-            const timeId = $(this).attr('id');
-            const blockTime = dayjs(timeId.replace('timeblock-', ''), 'hA');
-            const timeBlock = $(this);
-            if (blockTime.isBefore(currentTime, 'hour')) {
-                timeBlock.addClass('past').removeClass('present future');
-            } else if (blockTime.isSame(currentTime, 'hour')) {
-                timeBlock.addClass('present').removeClass('past future');
-            } else {
-                timeBlock.addClass('future').removeClass('past present');
-            }
-        });
-    }
+// Function to update time block classes based on current time
+function updateBlockClasses() {
+    const currentTime = dayjs();
+    const currentHour = currentTime.hour(); // Get the current hour of the day
+    console.log("Current Time:", currentTime);
+
+    $('.row[id^="timeblock-"]').each(function () {
+        const timeId = $(this).attr('id');
+        const blockHour = parseInt(timeId.replace('timeblock-', '')); // Extract the hour from the element's ID
+        const timeBlock = $(this);
+
+        if (blockHour < currentHour) {
+            timeBlock.addClass('past').removeClass('present future');
+        } else if (blockHour === currentHour) {
+            timeBlock.addClass('present').removeClass('past future');
+        } else {
+            timeBlock.addClass('future').removeClass('past present');
+        }
+    });
+}
+
 
     // Load saved events from local storage and populate textareas
     function loadSavedEvents() {
